@@ -56,7 +56,7 @@ class UserController extends BaseController
         ];
 
         // Realizar una solicitud GET a la API
-        $response = $curl->get('http://localhost/nexus_backend/public/api/user/' . $id, $options);
+        $response = $curl->get('http://localhost/nexus_backend/public/api/user/' . $id, $TESTLAGO);
 
         return $response;
     }
