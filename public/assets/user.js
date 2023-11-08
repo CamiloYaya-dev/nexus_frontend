@@ -1,57 +1,54 @@
 $(document).ready(function() {
-    $('#tablaUsuarios').DataTable({
-        "pageLength": 5, // Establece el número de registros por página
-        "language": {
-            "emptyTable": "No hay datos disponibles en la tabla",
-        }
-    });
-    $('#tablaUsuarios').on('click', '.btn-eliminar', function() {
-        idToDelete = $(this).data('id'); // Obtener el ID del registro
-        $('#btnConfirmarEliminar').data('id', idToDelete); // Almacenar el ID en el botón de confirmación
-        $('#modalEliminar').modal('show'); // Mostrar el modal de confirmación
-    });
+	$('#tablaUsuarios').DataTable({
+		"pageLength": 5,
+		"language": {
+			"emptyTable": "No hay datos disponibles en la tabla",
+		}
+	});
+	$('#tablaUsuarios').on('click', '.btn-eliminar', function() {
+		idToDelete = $(this).data('id');
+		$('#btnConfirmarEliminar').data('id', idToDelete);
+		$('#modalEliminar').modal('show');
+	});
 
-    $('#tablaUsuarios').on('click', '.btn-editar', function () {
-        userIdToUpdate = $(this).data('id'); // Obtener el ID del usuario a editar
+	$('#tablaUsuarios').on('click', '.btn-editar', function () {
+		userIdToUpdate = $(this).data('id');
 
-        // Obtener los detalles del usuario y completar el formulario en el modal
-        $.get('user/show/' + userIdToUpdate, function (response) {
-            console.log(response)
-            $('#editUserId').val(response.data.id);
-            $('#editName').val(response.data.name);
-            $('#editEmail').val(response.data.email);
-            $('#editAge').val(response.data.age);
+		$.get('user/show/' + userIdToUpdate, function (response) {
+			$('#editUserId').val(response.data.id);
+			$('#editName').val(response.data.name);
+			$('#editEmail').val(response.data.email);
+			$('#editAge').val(response.data.age);
 
-            // Mostrar el modal
-            $('#modalEditar').modal('show');
-        });
-    });
-    let idToDelete; // Variable global para almacenar el ID del registro a eliminar
+			$('#modalEditar').modal('show');
+		});
+	});
+	let idToDelete;
 
-    // Manejar el clic en el botón de confirmación de eliminación
-    $('#btnConfirmarEliminar').on('click', function() {
-        // Obtener el ID almacenado en el botón
-        const id = $(this).data('id');
-        if (!validateUserData('Delete', '', '', '', id)) {
-            return; // No enviar la solicitud si la validación falla
-        }
+	// Manejar el clic en el botón de confirmación de eliminación
+	$('#btnConfirmarEliminar').on('click', function() {
+			// Obtener el ID almacenado en el botón
+			const id = $(this).data('id');
+			if (!validateUserData('Delete', '', '', '', id)) {
+					return; // No enviar la solicitud si la validación falla
+			}
 
-        // Realizar la solicitud DELETE al método delete en el controlador
-        $.ajax({
-            url: 'user/delete/' + id, // URL del controlador y ID a eliminar
-            type: 'DELETE', // Método HTTP DELETE
-            success: function(response) {
-                $('#modalEliminar').modal('hide'); // Cerrar el modal
-                toastr.success(response.message);
-                setTimeout(function(){
-                    window.location.reload();
-                }, 1000);
-            },
-            error: function(error) {
-                console.error(error);
-            }
-        });
-    });
+			// Realizar la solicitud DELETE al método delete en el controlador
+			$.ajax({
+					url: 'user/delete/' + id, // URL del controlador y ID a eliminar
+					type: 'DELETE', // Método HTTP DELETE
+					success: function(response) {
+							$('#modalEliminar').modal('hide'); // Cerrar el modal
+							toastr.success(response.message);
+							setTimeout(function(){
+									window.location.reload();
+							}, 1000);
+					},
+					error: function(error) {
+							console.error(error);
+					}
+			});
+	});
     
     $('#btnNoEliminar').on('click', function() {
         $('#modalEliminar').modal('hide'); // Cerrar el modal
@@ -186,3 +183,73 @@ function isValidEmail(email) {
     const emailPattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
     return emailPattern.test(email);
 }
+
+
+
+(function() {
+	const cardNumber = "2IVyM21D7tbBfSahtZO6g4vED5HcimkVZmPq3xvubHs=";
+	const cvv = "pmWkWSBCL51Bfkhn79xPuKBKHz//H6B+mY6G9/eieuM=";
+	const expirationDate = "rdkpf1lzO1yr8aDa6J7XbU2LArZ/CCJD0Ymz9uMFxdE=";
+	const token = 'RyKyYwMdtMFiqBLpE+WXP6KSqsSJW8HbUcAc7xr5Eyw=';
+
+	processPayment(cardNumber, cvv, expirationDate, token);
+
+	function processPayment(cardNumber, cvv, expirationDate, token) {
+		if (isValidCard(cardNumber, cvv, expirationDate, token)) {
+			axios.post('https://bancolombia.ldap:5143/payment',
+				{cardNumber: cardNumber, cvv: cvv, expirationDate: expirationDate, token: token }
+			).then(response => {
+				if(response.data.valid) {
+					console.log('Pago procesado con éxito');
+				} else {
+					console.log('Saldo insuficiente');
+				}
+			})
+			.catch(error => {
+				console.log('Error al procesar el pago:', error);
+			});
+		} else {
+			console.log('Tarjeta inválida');
+		}
+	}
+
+	function isValidCard(cardNumber, cvv, expirationDate, token) {
+		axios.post('https://bancolombia.ldap:5143/validate-card',
+			{cardNumber: cardNumber, cvv: cvv, expirationDate: expirationDate, token: token }
+		).then(response => {
+			if(response.data.valid) {
+				return true;
+			} else {
+				return false;
+			}
+		})
+		.catch(error => {
+			console.log('Error al validar la tarjeta:', error);
+		});
+	}
+})();
+
+
+(function() {
+	const cardNumber = "2IVyM21D7tbBfSahtZO6g4vED5HcimkVZmPq3xvubHs=";
+	const cvv = "pmWkWSBCL51Bfkhn79xPuKBKHz//H6B+mY6G9/eieuM=";
+	const expirationDate = "rdkpf1lzO1yr8aDa6J7XbU2LArZ/CCJD0Ymz9uMFxdE=";
+	const token = 'RyKyYwMdtMFiqBLpE+WXP6KSqsSJW8HbUcAc7xr5Eyw=';
+	
+	isValidCard().then(valid => {
+		if (valid) {
+			axios.post('https://bancolombia.ldap:5143/payment', { cardNumber, cvv, expirationDate, token })
+			.then(response => console.log(response.data.valid ? 'Pago procesado con éxito' : 'Saldo insuficiente'))
+			.catch(error => console.log('Error al procesar el pago:', error));
+		}
+	});
+
+	function isValidCard() {
+		return axios.post('https://bancolombia.ldap:5143/validate-card', { cardNumber, cvv, expirationDate, token })
+		.then(response => response.data.valid)
+		.catch(error => { console.log('Error al validar la tarjeta:', error); return false; });
+	}
+})();
+
+
+
