@@ -28,7 +28,7 @@ jobs:
           git commit -m "Code formatted with Prettier" --allow-empty
 
       - name: Push changes
-        uses: ad-m/github-push-action@master
+        uses: ad-m/github-push-action@develop
         with:
           github_token: ${{ secrets.MY_PERSONAL_ACCESS_TOKEN }}
           force: true
